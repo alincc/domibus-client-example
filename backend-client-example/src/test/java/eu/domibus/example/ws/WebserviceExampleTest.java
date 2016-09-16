@@ -1,12 +1,11 @@
 package eu.domibus.example.ws;
 
 import backend.ecodex.org._1_1.*;
+import com.sun.xml.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 
-import javax.activation.DataHandler;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -18,7 +17,6 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
@@ -30,12 +28,13 @@ import static org.junit.Assert.*;
  */
 public class WebserviceExampleTest {
 
-    //In case you MSH webservice is not running on "http://localhost:8080/domibus/services/msh", please change
-    // this constant accordingly
+    //In case you MSH webservice is not running on "http://localhost:8080/domibus/services/msh", please change this constant accordingly
     private static final String MSH_URL = "http://localhost:8080/domibus/services/msh";
-    //In case you backend webservice is not running on "http://localhost:8080/domibus/services/backend", please change
-    // this constant accordingly
+    //private static final String MSH_URL = "http://10.57.224.44:8080/domibus/services/msh";
+
+    //In case you backend webservice is not running on "http://localhost:8080/domibus/services/backend", please change this constant accordingly
     private static final String BACKENDWS_URL = "http://localhost:8080/domibus/services/backend";
+    //private static final String BACKENDWS_URL = "http://10.57.224.44:8080/services/backend";
 
     private static final String TESTSENDMESSAGE_LOCATION_SENDREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_sendRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_MESSAGING = "src/test/resources/eu/domibus/example/ws/sendMessage_messaging.xml";
@@ -45,7 +44,7 @@ public class WebserviceExampleTest {
 
 
     @After
-    public void cleanUp() throws Exception{
+    public void cleanUp() throws Exception {
         ListPendingMessagesResponse listPendingMessagesResponse = webserviceExample.listPendingMessages();
 
         Thread.sleep(2000);
@@ -186,7 +185,7 @@ public class WebserviceExampleTest {
     private static class Helper {
         private static JAXBContext jaxbMessagingContext;
         private static JAXBContext jaxbWebserviceContext;
-        private static MessageFactory messageFactory = new com.sun.xml.internal.messaging.saaj.soap.ver1_2.SOAPMessageFactory1_2Impl();
+        private static MessageFactory messageFactory = new SOAPMessageFactory1_2Impl();
         private static final String LINE_SEPARATOR = System.getProperty("line.separator");
 
         static {
@@ -232,12 +231,12 @@ public class WebserviceExampleTest {
 
         private static String prepareMSHTestMessage(String messageId, String uriMessagingXML) throws Exception {
             //if the messageId is null, create new unique messageId
-            if(messageId == null) {
+            if (messageId == null) {
                 messageId = UUID.randomUUID().toString();
             }
 
             //if uriMessagingXML is null, use the SAMPLE_MSH_MESSAGE instead
-            if(uriMessagingXML == null) {
+            if (uriMessagingXML == null) {
                 uriMessagingXML = SAMPLE_MSH_MESSAGE;
             }
 
@@ -257,7 +256,7 @@ public class WebserviceExampleTest {
             return messageId;
         }
 
-        public static  String errorResultAsFormattedString(ErrorResultImplArray errorResultArray) {
+        public static String errorResultAsFormattedString(ErrorResultImplArray errorResultArray) {
             StringBuilder formattedOutput = new StringBuilder();
 
             for (ErrorResultImpl errorResult : errorResultArray.getItem()) {

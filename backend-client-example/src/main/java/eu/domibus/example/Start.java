@@ -38,8 +38,11 @@ public class Start {
     private static final String FROM_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator";
     private static final String TO_ROLE = "http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder";
 
-    private static final String FROM_PARTY_ID_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-blue";
-    private static final String TO_PARTY_ID_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:domibus-red";
+    private static final String FROM_PARTY_ID_VALUE = "domibus-blue";
+    private static final String TO_PARTY_ID_VALUE = "domibus-red";
+
+    private static final String FROM_PARTY_ID_TYPE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
+    private static final String TO_PARTY_ID_TYPE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered";
 
     private static final String HREF_PAYLOAD_1 = "#payload_1";
     private static final String HREF_PAYLOAD_2 = "payload_2";
@@ -107,9 +110,11 @@ public class Start {
 
         PartyId fromPartyId = objectFactory.createPartyId();
         fromPartyId.setValue(FROM_PARTY_ID_VALUE);
+        fromPartyId.setType(FROM_PARTY_ID_TYPE);
 
         PartyId toPartyId = objectFactory.createPartyId();
         toPartyId.setValue(TO_PARTY_ID_VALUE);
+        toPartyId.setType(TO_PARTY_ID_TYPE);
 
         From from = objectFactory.createFrom();
         from.setRole(FROM_ROLE);

@@ -25,7 +25,7 @@
                         <phase>generate-sources</phase>
                         <configuration>
                             <sourceRoot>
-                                ${project.build.directory}/generated/cxf
+                                ${project.build.directory}/generated-sources/cxf
                             </sourceRoot>
                             <wsdlOptions>
                                 <wsdlOption>
