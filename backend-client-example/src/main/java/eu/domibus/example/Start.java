@@ -57,7 +57,7 @@ public class Start {
     private static final String MESSAGEPROPERTY_FINAL_RECIPIENT_VALUE = "urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4";
 
 
-    private static WebserviceExample webserviceExample = new WebserviceExample();
+    private static WebserviceExample webserviceExample = new WebserviceExample("http://localhost:8080/domibus/services/backend");
 
     public static void main(String[] args) {
 
