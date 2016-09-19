@@ -17,8 +17,11 @@ import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Properties;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -28,19 +31,48 @@ import static org.junit.Assert.*;
  */
 public class WebserviceExampleTest {
 
-    //In case you MSH webservice is not running on "http://localhost:8080/domibus/services/msh", please change this constant accordingly
-    private static final String MSH_URL = "http://localhost:8080/domibus/services/msh";
-    //private static final String MSH_URL = "http://10.57.224.44:8080/domibus/services/msh";
-
-    //In case you backend webservice is not running on "http://localhost:8080/domibus/services/backend", please change this constant accordingly
-    private static final String BACKENDWS_URL = "http://localhost:8080/domibus/services/backend";
-    //private static final String BACKENDWS_URL = "http://10.57.224.44:8080/services/backend";
-
     private static final String TESTSENDMESSAGE_LOCATION_SENDREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_sendRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_MESSAGING = "src/test/resources/eu/domibus/example/ws/sendMessage_messaging.xml";
     private static final String SAMPLE_MSH_MESSAGE = "src/test/resources/eu/domibus/example/ws/sampleMSHMessage.xml";
 
-    private static WebserviceExample webserviceExample = new WebserviceExample(BACKENDWS_URL);
+    public static final String CONFIG_PROPERTIES = "config.properties";
+
+    private WebserviceExample webserviceExample;
+    ;
+
+    private static String mshWSLoc;
+
+    private Properties properties;
+
+    public WebserviceExampleTest() {
+
+        properties = new Properties();
+
+        try {
+
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream(CONFIG_PROPERTIES);
+
+            if (inputStream != null) {
+                properties.load(inputStream);
+            } else {
+                throw new FileNotFoundException("Property file '" + CONFIG_PROPERTIES + "' not found in the classpath");
+            }
+
+            inputStream.close();
+
+        } catch (Exception e) {
+            System.out.println("NO PROPERTIES configured due to exception: " + e);
+        }
+
+        if (properties != null) {
+            String backendWSLoc = properties.getProperty("backend.webservice.location");
+            if (backendWSLoc == null) webserviceExample = new WebserviceExample();
+            else webserviceExample = new WebserviceExample(backendWSLoc);
+            // MSH Webservice
+            mshWSLoc = properties.getProperty("msh.webservice.location");
+            if (mshWSLoc == null) mshWSLoc = "http://localhost:8080/domibus/services/msh";
+        }
+    }
 
 
     @After
@@ -67,7 +99,7 @@ public class WebserviceExampleTest {
         Messaging messaging = Helper.parseMessagingXML(TESTSENDMESSAGE_LOCATION_MESSAGING);
 
         SendResponse result = webserviceExample.sendMessage(sendRequest, messaging);
-
+        assertNotNull(result);
         assertNotNull(result.getMessageID());
         assertNotEquals("", result.getMessageID());
     }
@@ -210,7 +242,7 @@ public class WebserviceExampleTest {
             final QName serviceName = new QName("http://domibus.eu", "msh-dispatch-service");
             final QName portName = new QName("http://domibus.eu", "msh-dispatch");
             final javax.xml.ws.Service service = javax.xml.ws.Service.create(serviceName);
-            service.addPort(portName, SOAPBinding.SOAP12HTTP_BINDING, MSH_URL);
+            service.addPort(portName, SOAPBinding.SOAP12HTTP_BINDING, mshWSLoc);
             final Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
 
             SOAPMessage soapMessage = messageFactory.createMessage();
