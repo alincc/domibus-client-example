@@ -17,17 +17,16 @@ package eu.domibus.example.ws;/*
  * permissions and limitations under the Licence.
  */
 
-import backend.ecodex.org._1_1.*;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.example.ws.logging.MessageLoggingHandler;
+import eu.domibus.plugin.webService.generated.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.Holder;
 import javax.xml.ws.handler.Handler;
 import javax.xml.ws.soap.SOAPFaultException;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -62,24 +61,20 @@ public class WebserviceExample {
         return response;
     }
 
-    public void downloadMessage(DownloadMessageRequest downloadMessageRequest, DownloadMessageResponse response, Messaging ebmsHeader) {
-        Holder<DownloadMessageResponse> responseHolder = new Holder<DownloadMessageResponse>();
-        Holder<Messaging> messagingHolder = new Holder<Messaging>();
+    public void downloadMessage(DownloadMessageRequest downloadMessageRequest, Holder<DownloadMessageResponse> response, Holder<Messaging> ebmsHeader) {
 
         try {
-            backendPort.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
+            backendPort.downloadMessage(downloadMessageRequest, response, ebmsHeader);
         } catch (DownloadMessageFault downloadMessageFault) {
             LOG.error("Error while downloading message");
         } catch (SOAPFaultException soapFaultException) {
             LOG.warn(soapFaultException);
         }
 
-        response = responseHolder.value;
-        ebmsHeader = messagingHolder.value;
     }
 
     public ListPendingMessagesResponse listPendingMessages() {
-        return backendPort.listPendingMessages(null);
+        return backendPort.listPendingMessages("");
     }
 
     public MessageStatus getMessageStatus(GetStatusRequest messageStatusRequest) {

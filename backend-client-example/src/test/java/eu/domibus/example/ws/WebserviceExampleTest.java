@@ -1,12 +1,11 @@
 package eu.domibus.example.ws;
 
-import backend.ecodex.org._1_1.*;
+import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
+import eu.domibus.plugin.webService.generated.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 
-import javax.activation.DataHandler;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -16,9 +15,9 @@ import javax.xml.namespace.QName;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
+import javax.xml.ws.Holder;
 import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
@@ -39,7 +38,7 @@ public class WebserviceExampleTest {
 
     private static final String TESTSENDMESSAGE_LOCATION_SENDREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_sendRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_MESSAGING = "src/test/resources/eu/domibus/example/ws/sendMessage_messaging.xml";
-    private static final String SAMPLE_MSH_MESSAGE = "src/test/resources/eu/domibus/example/ws/sampleMSHMessage.xml";
+    private static final String SAMPLE_MSH_MESSAGE = "src/test/resources/eu/domibus/example/ws/sampleMHSMessage.xml";
 
     private static WebserviceExample webserviceExample = new WebserviceExample(BACKENDWS_URL);
 
@@ -54,11 +53,16 @@ public class WebserviceExampleTest {
             DownloadMessageRequest downloadMessageRequest = new DownloadMessageRequest();
             downloadMessageRequest.setMessageID(messageIdCurrentMessage);
 
-            DownloadMessageResponse downloadMessageResponse = null;
-            Messaging ebMSHeaderResponse = null;
+            Holder<DownloadMessageResponse> responseHolder = new Holder<DownloadMessageResponse>();
+            Holder<Messaging> messagingHolder = new Holder<Messaging>();
 
-            webserviceExample.downloadMessage(downloadMessageRequest, downloadMessageResponse, ebMSHeaderResponse);
+            webserviceExample.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
         }
+    }
+
+    @Before
+    public void prepare() throws Exception {
+        Thread.sleep(5000);
     }
 
 
@@ -73,29 +77,6 @@ public class WebserviceExampleTest {
         assertNotEquals("", result.getMessageID());
     }
 
-    @Test
-    public void testDownloadMessage_NoMessageIdProvided_NextMessageExpected() throws Exception {
-        //create new unique messageId
-        String messageId = UUID.randomUUID().toString();
-
-        //send message to domibus instance, but on the MSH side, in order to have a message that is available for download
-        Helper.prepareMSHTestMessage(messageId, SAMPLE_MSH_MESSAGE);
-
-        //no messageId has been set. In this case, the next available message is downloaded
-        DownloadMessageRequest downloadMessageRequest = new DownloadMessageRequest();
-
-        //Since this method has two return values the response objects are passed over as method parameters.
-        DownloadMessageResponse downloadMessageResponse = null;
-        Messaging ebMSHeaderResponse = null;
-
-
-        webserviceExample.downloadMessage(downloadMessageRequest, downloadMessageResponse, ebMSHeaderResponse);
-
-        //Since the only message that should be available for download is the message we have sent at the beginning
-        //of this test, the messageId of the downloaded message must be the same as the messageId of the message initially
-        //sent to the MSH
-        assertEquals(messageId, ebMSHeaderResponse.getUserMessage().getMessageInfo().getMessageId());
-    }
 
     @Test
     public void testDownloadMessage_MessageIdProvided_MessageWithMessageIDExpected() throws Exception {
@@ -116,10 +97,17 @@ public class WebserviceExampleTest {
         downloadMessageRequest.setMessageID(messageId);
 
         //Since this method has two return values the response objects are passed over as method parameters.
-        DownloadMessageResponse downloadMessageResponse = null;
-        Messaging ebMSHeaderResponse = null;
+        Holder<DownloadMessageResponse> responseHolder = new Holder<DownloadMessageResponse>();
+        Holder<Messaging> messagingHolder = new Holder<Messaging>();
 
-        webserviceExample.downloadMessage(downloadMessageRequest, downloadMessageResponse, ebMSHeaderResponse);
+
+        webserviceExample.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
+
+        assertNotNull(responseHolder);
+        assertNotNull(messagingHolder);
+
+        DownloadMessageResponse downloadMessageResponse = responseHolder.value;
+        Messaging ebMSHeaderResponse = messagingHolder.value;
 
         //Since the only message that should be available for download is the message we have sent at the beginning
         //of this test, the messageId of the downloaded message must be the same as the messageId of the message initially
@@ -153,7 +141,7 @@ public class WebserviceExampleTest {
 
         GetStatusRequest messageStatusRequest = new GetStatusRequest();
         //The messageId determines the message for which the status is requested
-        messageStatusRequest.setMessageID(UUID.randomUUID().toString());
+        messageStatusRequest.setMessageID(messageId);
 
         MessageStatus response = webserviceExample.getMessageStatus(messageStatusRequest);
 
@@ -191,8 +179,8 @@ public class WebserviceExampleTest {
 
         static {
             try {
-                jaxbMessagingContext = JAXBContext.newInstance("org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704");
-                jaxbWebserviceContext = JAXBContext.newInstance("backend.ecodex.org._1_1");
+                jaxbMessagingContext = JAXBContext.newInstance("eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704");
+                jaxbWebserviceContext = JAXBContext.newInstance("eu.domibus.plugin.webService.generated");
             } catch (JAXBException e) {
                 throw new RuntimeException("Initialization of Helper class failed.");
             }
@@ -216,7 +204,9 @@ public class WebserviceExampleTest {
 
             SOAPMessage soapMessage = messageFactory.createMessage();
 
-            jaxbMessagingContext.createMarshaller().marshal(messaging, soapMessage.getSOAPHeader());
+//            jaxbMessagingContext.createMarshaller().marshal(messaging, soapMessage.getSOAPHeader());
+            jaxbMessagingContext.createMarshaller().marshal(new JAXBElement(new QName("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/", "Messaging"), Messaging.class, messaging), soapMessage.getSOAPHeader());
+            soapMessage.getSOAPBody().addTextNode("This is the content of the body");
             soapMessage.saveChanges();
 
             return dispatch.invoke(soapMessage);

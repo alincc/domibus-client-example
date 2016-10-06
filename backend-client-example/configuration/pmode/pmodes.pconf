@@ -1,0 +1,246 @@
+// Employed ebMS3 profile. used for configuration validation. Supported values are: AS4, ESENS, UNDEFINED
+// NOT SUPPORTED YET
+EmployedProfile : AS4
+
+MPCs{
+	// Configuration Id
+	MPC defaultMpc {
+		// Used by default. There may only be one default MPC
+		Default : true
+		// IF enabled = false this MPC will not accept any messages
+		Enabled : true
+		// corresponding to eb:Messaging/eb:UserMessage/@mpc
+		Name : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC'
+		/** 
+		 * Message retention in minutes.
+		 * 0 = delete immediately
+		 * -1 = keep indefinitely
+		 */
+		MessageRetentionDownloaded : 0	
+		MessageRetentionUnDownloaded : 60
+	} 
+}
+
+Parties{
+	PartyIdTypes{
+		Type partyTypeUnregistered : 'urn:oasis:names:tc:ebcore:partyid-type:unregistered'
+		Type partyTypeEmpty : ''
+	}
+	/**
+	 * Internal name of party entity.  
+	 * Use this as the alias for the corresponding pubilc encryption key in your keystore.
+	 */
+	
+	Party red_gw {
+		partyTypeUnregistered : 'domibus-red'
+		Endpoint : 'http://localhost:8080/domibus/services/msh'
+	}
+	Party blue_gw {
+		partyTypeUnregistered : 'domibus-blue'
+		Endpoint : 'http://localhost:8090/domibus/services/msh'
+	}
+
+}
+
+AS4{	
+	Reliability AS4Reliability : Nonrepudiation  = true Replypattern = response
+	Reliability NOReliability : Nonrepudiation = false Replypattern = response
+	ReceptionAwareness receptionAwareness : retryTimeout = 1 retryCount = 2 strategy = CONSTANT duplicateDetection = true	
+}
+
+Securities{	
+	Security noSecurity {
+		Policy : 'doNothingPolicy.xml'
+		SignatureMethod : RSA_SHA1
+	}
+	Security signOnly {
+		Policy : 'signOnly.xml' 
+		SignatureMethod : RSA_SHA256 
+	}
+	Security signAndEncrypt {
+		Policy : 'signEncrypt.xml' 
+		SignatureMethod : RSA_SHA256 
+	}	
+}
+
+BusinessProcessConfiguration{
+	
+	Agreements{
+		Agreement agreementEmpty : ''
+		Agreement tc1Agreement : 'e-sens-c2-c3-tc1-agreement'
+		Agreement tc2Agreement : 'e-sens-c2-c3-tc2-agreement'	
+		Agreement tc3Agreement : 'e-sens-c2-c3-tc3-agreement'	
+	}
+	
+	Actions{
+		Action ebmsTestAction : 'http://docs.oasis-open.org/ebxml-msg/as4/200902/action'
+		Action tc0Action : 'TC0Leg1'
+		Action tc1Action : 'TC1Leg1'
+		Action tc2Action : 'TC2Leg1'
+		Action tc3ActionLeg1 : 'TC3Leg1'
+		Action tc3ActionLeg2 : 'TC3Leg2'
+	}
+	
+	Services{
+		ServiceTypes {
+			Type tc0 : 'tc0'
+			Type tc1 : 'tc1'
+			Type tc2 : 'tc2'
+			Type tc3 : 'tc3'
+		}
+		// resolves to: <eb:Service>AS4</eb:Service>
+		Service as4TestService : 'http://docs.oasis-open.org/ebxml-msg/as4/200902/service' Actions { ebmsTestAction tc1Action tc2Action tc3ActionLeg1 tc3ActionLeg2 }		
+		Service testService0 : 'bdx:noprocess' type = tc0 Actions { tc0Action }
+		Service testService1 : 'bdx:noprocess' type = tc1 Actions { tc1Action } 
+		Service testService2 : 'bdx:noprocess' type = tc2 Actions { tc2Action }
+		Service testService3 : 'bdx:noprocess' type = tc3 Actions { tc3ActionLeg1 tc3ActionLeg2 }
+	}
+	
+	ExchangePatterns{
+		Patterns{
+			MEP oneway : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/oneWay' Legs = 1	
+			MEP twoway : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/twoWay' Legs = 2		
+		}
+		Bindings{
+			Binding push : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push'	
+			Binding pushAndPush : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push'		
+		}
+	}
+	
+	Roles{
+		Role defaultInitiatorRole : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator'
+		Role defaultResponderRole : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder'
+	}
+	
+	Processes{	
+			
+		PropertySets{
+			Properties{
+				Property originalSenderProperty : key=originalSender type = string required= true
+				Property finalRecipientProperty : key=finalRecipient type = string required= true
+			}
+			Set ecodexPropertySet: finalRecipientProperty originalSenderProperty 
+		}		
+		
+	
+		ErrorHandlings{
+			ErrorHandling demoErrorHandling {
+				ErrorAsResponse : true
+				ProcessErrorNotifyProducer : false
+				ProcessErrorNotifyConsumer : false
+				DeliveryFailureNotifyProducer : false				
+			}	
+		}
+		
+		Legs{
+			
+			Leg pushTestcase0 {
+				ReceptionAwareness : receptionAwareness
+				ProperySet : ecodexPropertySet
+				Service : testService0
+				Action : tc0Action
+				DefaultMpc : defaultMpc
+				Security : noSecurity
+				Reliability : NOReliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : false
+			}
+			
+			Leg pushTestcase1 {
+				ReceptionAwareness : receptionAwareness				
+				ProperySet : ecodexPropertySet
+				Service : testService1
+				Action : tc1Action
+				DefaultMpc : defaultMpc
+				Security : signOnly
+				Reliability : AS4Reliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : true
+			}
+ 
+			
+			Leg pushTestcase2 {
+				ReceptionAwareness : receptionAwareness	
+				ProperySet : ecodexPropertySet
+				Service : testService2
+				Action : tc2Action
+				DefaultMpc : defaultMpc
+				Security : signAndEncrypt
+				Reliability : AS4Reliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : true
+			}
+			
+			Leg pushTestcase3Leg1 {
+				ReceptionAwareness : receptionAwareness	
+				ProperySet : ecodexPropertySet
+				Service : testService3
+				Action : tc3ActionLeg1
+				DefaultMpc : defaultMpc
+				Security : signAndEncrypt
+				Reliability : AS4Reliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : true
+			}	
+			
+			Leg pushTestcase3Leg2 {
+				ReceptionAwareness : receptionAwareness	
+				ProperySet : ecodexPropertySet
+				Service : testService3
+				Action : tc3ActionLeg2
+				DefaultMpc : defaultMpc
+				Security : signAndEncrypt
+				Reliability : AS4Reliability
+				ErrorHandling : demoErrorHandling
+				CompressPayloads : true
+			}
+						
+		}
+		
+		Process tc0Process {
+			Agreement : agreementEmpty
+			Mep : oneway
+			Binding : push
+			InitiatorRole : defaultInitiatorRole
+			ResponderRole : defaultResponderRole
+			InitiatorParties : blue_gw, red_gw
+			ResponderParties : blue_gw, red_gw
+			Legs : pushTestcase0
+		}
+				
+		Process tc1Process {
+			Agreement : agreementEmpty
+			Mep : oneway
+			Binding : push
+			InitiatorRole : defaultInitiatorRole
+			ResponderRole : defaultResponderRole
+			InitiatorParties : blue_gw, red_gw
+			ResponderParties : blue_gw, red_gw
+			Legs : pushTestcase1
+		}	
+
+		
+		Process tc2Process {
+			Agreement : agreementEmpty
+			Mep : oneway
+			Binding : push
+			InitiatorRole : defaultInitiatorRole
+			ResponderRole : defaultResponderRole
+			InitiatorParties : blue_gw, red_gw
+			ResponderParties : blue_gw, red_gw
+			Legs : pushTestcase2
+		}
+				
+		Process tc3Process {
+			Agreement : agreementEmpty
+			Mep : twoway
+			Binding : pushAndPush
+			InitiatorRole : defaultInitiatorRole
+			ResponderRole : defaultResponderRole
+			InitiatorParties : blue_gw, red_gw
+			ResponderParties : blue_gw, red_gw
+			Legs : pushTestcase3Leg1, pushTestcase3Leg2
+		}		
+		
+	}
+}
