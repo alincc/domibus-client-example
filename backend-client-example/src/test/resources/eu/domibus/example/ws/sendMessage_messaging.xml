@@ -2,17 +2,17 @@
     <ns:UserMessage>
         <ns:PartyInfo>
             <ns:From>
-                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">ceftestparty5gw</ns:PartyId>
                 <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
             </ns:From>
             <ns:To>
-                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">cefsupportgw</ns:PartyId>
                 <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
             </ns:To>
         </ns:PartyInfo>
         <ns:CollaborationInfo>
-            <ns:Service type="tc1">bdx:noprocess</ns:Service>
-            <ns:Action>TC1Leg1</ns:Action>
+            <ns:Service type="e-delivery">http://ec.europa.eu/e-delivery/services/connectivity-service</ns:Service>
+            <ns:Action>submitMessage</ns:Action>
         </ns:CollaborationInfo>
         <ns:MessageProperties>
             <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>

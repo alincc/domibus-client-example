@@ -31,12 +31,12 @@ Parties{
 	 * Use this as the alias for the corresponding pubilc encryption key in your keystore.
 	 */
 	
-	Party red_gw {
-		partyTypeUnregistered : 'domibus-red'
+	Party ceftestgw5 {
+		partyTypeUnregistered : 'ceftestparty5gw'
 		Endpoint : 'http://localhost:8080/domibus/services/msh'
 	}
-	Party blue_gw {
-		partyTypeUnregistered : 'domibus-blue'
+	Party cefsupportgw {
+		partyTypeUnregistered : 'cefsupportgw'
 		Endpoint : 'http://localhost:8090/domibus/services/msh'
 	}
 
@@ -53,47 +53,26 @@ Securities{
 		Policy : 'doNothingPolicy.xml'
 		SignatureMethod : RSA_SHA1
 	}
-	Security signOnly {
-		Policy : 'signOnly.xml' 
-		SignatureMethod : RSA_SHA256 
-	}
-	Security signAndEncrypt {
-		Policy : 'signEncrypt.xml' 
-		SignatureMethod : RSA_SHA256 
-	}	
 }
 
 BusinessProcessConfiguration{
 	
 	Agreements{
 		Agreement agreementEmpty : ''
-		Agreement tc1Agreement : 'e-sens-c2-c3-tc1-agreement'
-		Agreement tc2Agreement : 'e-sens-c2-c3-tc2-agreement'	
-		Agreement tc3Agreement : 'e-sens-c2-c3-tc3-agreement'	
 	}
 	
 	Actions{
-		Action ebmsTestAction : 'http://docs.oasis-open.org/ebxml-msg/as4/200902/action'
-		Action tc0Action : 'TC0Leg1'
-		Action tc1Action : 'TC1Leg1'
-		Action tc2Action : 'TC2Leg1'
-		Action tc3ActionLeg1 : 'TC3Leg1'
-		Action tc3ActionLeg2 : 'TC3Leg2'
+		Action submitMessage : 'submitMessage'
+		
 	}
 	
 	Services{
 		ServiceTypes {
-			Type tc0 : 'tc0'
-			Type tc1 : 'tc1'
-			Type tc2 : 'tc2'
-			Type tc3 : 'tc3'
+			Type edelivery : 'e-delivery'
 		}
-		// resolves to: <eb:Service>AS4</eb:Service>
-		Service as4TestService : 'http://docs.oasis-open.org/ebxml-msg/as4/200902/service' Actions { ebmsTestAction tc1Action tc2Action tc3ActionLeg1 tc3ActionLeg2 }		
-		Service testService0 : 'bdx:noprocess' type = tc0 Actions { tc0Action }
-		Service testService1 : 'bdx:noprocess' type = tc1 Actions { tc1Action } 
-		Service testService2 : 'bdx:noprocess' type = tc2 Actions { tc2Action }
-		Service testService3 : 'bdx:noprocess' type = tc3 Actions { tc3ActionLeg1 tc3ActionLeg2 }
+		// resolves to: <eb:Service>AS4</eb:Service>		
+		Service connectivityservice : 'http://ec.europa.eu/e-delivery/services/connectivity-service' type = edelivery Actions { submitMessage }
+		
 	}
 	
 	ExchangePatterns{
@@ -103,7 +82,6 @@ BusinessProcessConfiguration{
 		}
 		Bindings{
 			Binding push : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push'	
-			Binding pushAndPush : 'http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/push-and-push'		
 		}
 	}
 	
@@ -134,11 +112,11 @@ BusinessProcessConfiguration{
 		
 		Legs{
 			
-			Leg pushTestcase0 {
+			Leg pushConnectivityTest {
 				ReceptionAwareness : receptionAwareness
 				ProperySet : ecodexPropertySet
-				Service : testService0
-				Action : tc0Action
+				Service : connectivityservice
+				Action : submitMessage
 				DefaultMpc : defaultMpc
 				Security : noSecurity
 				Reliability : NOReliability
@@ -146,54 +124,7 @@ BusinessProcessConfiguration{
 				CompressPayloads : false
 			}
 			
-			Leg pushTestcase1 {
-				ReceptionAwareness : receptionAwareness				
-				ProperySet : ecodexPropertySet
-				Service : testService1
-				Action : tc1Action
-				DefaultMpc : defaultMpc
-				Security : signOnly
-				Reliability : AS4Reliability
-				ErrorHandling : demoErrorHandling
-				CompressPayloads : true
-			}
- 
 			
-			Leg pushTestcase2 {
-				ReceptionAwareness : receptionAwareness	
-				ProperySet : ecodexPropertySet
-				Service : testService2
-				Action : tc2Action
-				DefaultMpc : defaultMpc
-				Security : signAndEncrypt
-				Reliability : AS4Reliability
-				ErrorHandling : demoErrorHandling
-				CompressPayloads : true
-			}
-			
-			Leg pushTestcase3Leg1 {
-				ReceptionAwareness : receptionAwareness	
-				ProperySet : ecodexPropertySet
-				Service : testService3
-				Action : tc3ActionLeg1
-				DefaultMpc : defaultMpc
-				Security : signAndEncrypt
-				Reliability : AS4Reliability
-				ErrorHandling : demoErrorHandling
-				CompressPayloads : true
-			}	
-			
-			Leg pushTestcase3Leg2 {
-				ReceptionAwareness : receptionAwareness	
-				ProperySet : ecodexPropertySet
-				Service : testService3
-				Action : tc3ActionLeg2
-				DefaultMpc : defaultMpc
-				Security : signAndEncrypt
-				Reliability : AS4Reliability
-				ErrorHandling : demoErrorHandling
-				CompressPayloads : true
-			}
 						
 		}
 		
@@ -203,44 +134,11 @@ BusinessProcessConfiguration{
 			Binding : push
 			InitiatorRole : defaultInitiatorRole
 			ResponderRole : defaultResponderRole
-			InitiatorParties : blue_gw, red_gw
-			ResponderParties : blue_gw, red_gw
-			Legs : pushTestcase0
-		}
-				
-		Process tc1Process {
-			Agreement : agreementEmpty
-			Mep : oneway
-			Binding : push
-			InitiatorRole : defaultInitiatorRole
-			ResponderRole : defaultResponderRole
-			InitiatorParties : blue_gw, red_gw
-			ResponderParties : blue_gw, red_gw
-			Legs : pushTestcase1
-		}	
-
-		
-		Process tc2Process {
-			Agreement : agreementEmpty
-			Mep : oneway
-			Binding : push
-			InitiatorRole : defaultInitiatorRole
-			ResponderRole : defaultResponderRole
-			InitiatorParties : blue_gw, red_gw
-			ResponderParties : blue_gw, red_gw
-			Legs : pushTestcase2
-		}
-				
-		Process tc3Process {
-			Agreement : agreementEmpty
-			Mep : twoway
-			Binding : pushAndPush
-			InitiatorRole : defaultInitiatorRole
-			ResponderRole : defaultResponderRole
-			InitiatorParties : blue_gw, red_gw
-			ResponderParties : blue_gw, red_gw
-			Legs : pushTestcase3Leg1, pushTestcase3Leg2
-		}		
+			InitiatorParties : ceftestgw5, cefsupportgw
+			ResponderParties : ceftestgw5, cefsupportgw
+			Legs : pushConnectivityTest
+		}				
+	
 		
 	}
 }

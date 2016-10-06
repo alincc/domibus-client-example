@@ -42,7 +42,7 @@ public class WebserviceExampleTest {
 
     private static final String TESTSENDMESSAGE_LOCATION_SENDREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_sendRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_MESSAGING = "src/test/resources/eu/domibus/example/ws/sendMessage_messaging.xml";
-    private static final String SAMPLE_MSH_MESSAGE = "src/test/resources/eu/domibus/example/ws/sampleMHSMessage.xml";
+    private static final String SAMPLE_MSH_MESSAGE = "src/test/resources/eu/domibus/example/ws/sampleMSHMessage.xml";
 
     public static final String CONFIG_PROPERTIES = "config.properties";
 
