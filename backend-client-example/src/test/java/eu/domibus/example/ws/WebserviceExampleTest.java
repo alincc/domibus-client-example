@@ -84,7 +84,7 @@ public class WebserviceExampleTest {
 
 
     @After
-    public void cleanUp() throws Exception{
+    public void cleanUp() throws Exception {
         ListPendingMessagesResponse listPendingMessagesResponse = backendInterface.listPendingMessages("");
 
         Thread.sleep(2000);
@@ -103,6 +103,7 @@ public class WebserviceExampleTest {
     @Before
     public void prepare() throws Exception {
         Thread.sleep(5000);
+        backendInterface = webserviceExample.getPort();
     }
 
 
@@ -262,12 +263,12 @@ public class WebserviceExampleTest {
 
         private static String prepareMSHTestMessage(String messageId, String uriMessagingXML) throws Exception {
             //if the messageId is null, create new unique messageId
-            if(messageId == null) {
+            if (messageId == null) {
                 messageId = UUID.randomUUID().toString();
             }
 
             //if uriMessagingXML is null, use the SAMPLE_MSH_MESSAGE instead
-            if(uriMessagingXML == null) {
+            if (uriMessagingXML == null) {
                 uriMessagingXML = SAMPLE_MSH_MESSAGE;
             }
 
@@ -287,7 +288,7 @@ public class WebserviceExampleTest {
             return messageId;
         }
 
-        public static  String errorResultAsFormattedString(ErrorResultImplArray errorResultArray) {
+        public static String errorResultAsFormattedString(ErrorResultImplArray errorResultArray) {
             StringBuilder formattedOutput = new StringBuilder();
 
             for (ErrorResultImpl errorResult : errorResultArray.getItem()) {
