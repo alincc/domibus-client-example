@@ -1,34 +1,27 @@
 <ns:Messaging xmlns:ns="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/">
     <ns:UserMessage>
-        <!--You may enter the following 5 items in any order-->
         <ns:PartyInfo>
-            <!--You may enter the following 2 items in any order-->
             <ns:From>
-                <!--You may enter the following 2 items in any order-->
-                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-blue</ns:PartyId>
+                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">ceftestparty5gw</ns:PartyId>
                 <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/initiator</ns:Role>
             </ns:From>
             <ns:To>
-                <!--You may enter the following 2 items in any order-->
-                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">domibus-red</ns:PartyId>
+                <ns:PartyId type="urn:oasis:names:tc:ebcore:partyid-type:unregistered">cefsupportgw</ns:PartyId>
                 <ns:Role>http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/responder</ns:Role>
             </ns:To>
         </ns:PartyInfo>
         <ns:CollaborationInfo>
-            <!--You may enter the following 4 items in any order-->
-            <ns:Service type="tc1">bdx:noprocess</ns:Service>
-            <ns:Action>TC1Leg1</ns:Action>
+            <ns:Service type="e-delivery">http://ec.europa.eu/e-delivery/services/connectivity-service</ns:Service>
+            <ns:Action>submitMessage</ns:Action>
         </ns:CollaborationInfo>
         <ns:MessageProperties>
-            <!--1 or more repetitions:-->
             <ns:Property name="originalSender">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C1</ns:Property>
             <ns:Property name="finalRecipient">urn:oasis:names:tc:ebcore:partyid-type:unregistered:C4</ns:Property>
         </ns:MessageProperties>
         <ns:PayloadInfo>
-            <ns:PartInfo href="cid:message">
+            <ns:PartInfo href="cid:payload">
                 <ns:PartProperties>
-                    <ns:Property name="description">Call from Domibus Client Example</ns:Property>
-                    <ns:Property name="MimeType">Text/Xml</ns:Property>
+                    <ns:Property name="MimeType">text/xml</ns:Property>
                 </ns:PartProperties>
             </ns:PartInfo>
         </ns:PayloadInfo>

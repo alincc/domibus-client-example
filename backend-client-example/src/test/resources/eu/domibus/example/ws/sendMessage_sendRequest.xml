@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ns3:sendRequest xmlns:ns3="http://org.ecodex.backend/1_1/">
-    <!--    <payload payloadId="cid:payload" xmime:contentType="application/xml">VEVTVA==</payload> -->
-    <payload payloadId="cid:message">PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=
-    </payload>
+<ns3:sendRequest xmlns:xmime="http://www.w3.org/2005/05/xmlmime" xmlns:ns3="http://org.ecodex.backend/1_1/">
+    <payload payloadId="cid:payload" xmime:contentType="application/xml">VEVTVA==</payload>
 </ns3:sendRequest>
