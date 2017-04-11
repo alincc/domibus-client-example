@@ -36,9 +36,9 @@ public class WebserviceExampleTest {
     private static final String MSH_URL = "http://localhost:8080/domibus/services/msh";
     //private static final String MSH_URL = "http://10.57.224.44:8080/domibus/services/msh";
 
-    //In case you backend webservice is not running on "http://localhost:8080/domibus/services/backend", please change this constant accordingly
-    private static final String BACKENDWS_URL = "http://localhost:8080/domibus/services/backend";
-    //private static final String BACKENDWS_URL = "http://10.57.224.44:8080/services/backend";
+    //In case you backend webservice is not running on "http://localhost:8080/domibus/services/backend?wsdl", please change this constant accordingly
+    private static final String BACKENDWS_URL = "http://localhost:8080/domibus/services/backend?wsdl";
+    //private static final String BACKENDWS_URL = "http://10.57.224.44:8080/services/backend?wsdl";
 
     private static final String TESTSENDMESSAGE_LOCATION_SENDREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_sendRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_MESSAGING = "src/test/resources/eu/domibus/example/ws/sendMessage_messaging.xml";
@@ -47,14 +47,13 @@ public class WebserviceExampleTest {
     public static final String CONFIG_PROPERTIES = "config.properties";
 
     private WebserviceExample webserviceExample;
-    ;
+    private BackendInterface backendInterface;
 
     private static String mshWSLoc;
 
     private Properties properties;
 
     public WebserviceExampleTest() {
-
         properties = new Properties();
 
         try {
@@ -86,7 +85,7 @@ public class WebserviceExampleTest {
 
     @After
     public void cleanUp() throws Exception{
-        ListPendingMessagesResponse listPendingMessagesResponse = webserviceExample.listPendingMessages();
+        ListPendingMessagesResponse listPendingMessagesResponse = backendInterface.listPendingMessages("");
 
         Thread.sleep(2000);
 
@@ -97,7 +96,7 @@ public class WebserviceExampleTest {
             Holder<DownloadMessageResponse> responseHolder = new Holder<DownloadMessageResponse>();
             Holder<Messaging> messagingHolder = new Holder<Messaging>();
 
-            webserviceExample.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
+            backendInterface.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
         }
     }
 
@@ -112,7 +111,7 @@ public class WebserviceExampleTest {
         SendRequest sendRequest = Helper.parseSendRequestXML(TESTSENDMESSAGE_LOCATION_SENDREQUEST);
         Messaging messaging = Helper.parseMessagingXML(TESTSENDMESSAGE_LOCATION_MESSAGING);
 
-        SendResponse result = webserviceExample.sendMessage(sendRequest, messaging);
+        SendResponse result = backendInterface.sendMessage(sendRequest, messaging);
         assertNotNull(result);
         assertNotNull(result.getMessageID());
         assertNotEquals("", result.getMessageID());
@@ -142,7 +141,7 @@ public class WebserviceExampleTest {
         Holder<Messaging> messagingHolder = new Holder<Messaging>();
 
 
-        webserviceExample.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
+        backendInterface.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
 
         assertNotNull(responseHolder);
         assertNotNull(messagingHolder);
@@ -164,7 +163,7 @@ public class WebserviceExampleTest {
         //send message to domibus instance, but on the MSH side, in order to have a message that is available for download
         Helper.prepareMSHTestMessage(messageId, SAMPLE_MSH_MESSAGE);
 
-        ListPendingMessagesResponse listPendingMessagesResponse = webserviceExample.listPendingMessages();
+        ListPendingMessagesResponse listPendingMessagesResponse = backendInterface.listPendingMessages("");
         assertTrue(listPendingMessagesResponse.getMessageID().size() == 1);
         assertEquals(messageId, listPendingMessagesResponse.getMessageID().get(0));
     }
@@ -184,7 +183,7 @@ public class WebserviceExampleTest {
         //The messageId determines the message for which the status is requested
         messageStatusRequest.setMessageID(messageId);
 
-        MessageStatus response = webserviceExample.getMessageStatus(messageStatusRequest);
+        MessageStatus response = backendInterface.getMessageStatus(messageStatusRequest);
 
         assertEquals(MessageStatus.RECEIVED, response);
     }
@@ -204,7 +203,7 @@ public class WebserviceExampleTest {
         //The messageId determines the message for which the list of errors is requested
         messageErrorsRequest.setMessageID(UUID.randomUUID().toString());
 
-        ErrorResultImplArray response = webserviceExample.getMessageErrors(messageErrorsRequest);
+        ErrorResultImplArray response = backendInterface.getMessageErrors(messageErrorsRequest);
 
         String errorString = Helper.errorResultAsFormattedString(response);
 
