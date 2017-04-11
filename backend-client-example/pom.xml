@@ -5,9 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>domibus-client-example</artifactId>
         <groupId>eu.domibus</groupId>
-        <version>1.0-SNAPSHOT</version>
+        <artifactId>domibus-client-example</artifactId>
+        <version>3.2</version>
     </parent>
 
     <artifactId>backend-client-example</artifactId>
@@ -26,9 +26,10 @@
     <dependencies>
         <dependency>
             <groupId>eu.domibus</groupId>
-            <artifactId>domibus-default-ws-client</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <artifactId>domibus-ws-stubs</artifactId>
+            <version>3.2</version>
         </dependency>
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -44,14 +45,8 @@
             <artifactId>commons-logging</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.sun.xml.messaging.saaj</groupId>
-            <artifactId>saaj-impl</artifactId>
-            <version>1.3.4</version>
-        </dependency>
-        <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>1.1</version>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
         </dependency>
     </dependencies>
 

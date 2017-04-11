@@ -6,10 +6,10 @@
 
     <groupId>eu.domibus</groupId>
     <artifactId>domibus-client-example</artifactId>
+    <version>3.2</version>
     <packaging>pom</packaging>
-    <version>1.0-SNAPSHOT</version>
+
     <modules>
-        <module>domibus-default-ws-client</module>
         <module>backend-client-example</module>
     </modules>
 
@@ -17,6 +17,17 @@
         <cxf.version>3.1.6</cxf.version>
         <log4j.version>1.2.17</log4j.version>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>cefdigital-releases</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery</url>
+        </repository>
+        <snapshotRepository>
+            <id>cefdigital-snapshots</id>
+            <url>https://ec.europa.eu/cefdigital/artifact/content/repositories/eDelivery-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <build>
         <pluginManagement>
@@ -29,6 +40,8 @@
                         <source>1.7</source>
                         <target>1.7</target>
                         <encoding>UTF-8</encoding>
+                        <fork>true</fork>
+                        <compilerArgument>-XDignore.symbol.file</compilerArgument>
                     </configuration>
                 </plugin>
             </plugins>
@@ -46,6 +59,11 @@
                 <groupId>commons-logging</groupId>
                 <artifactId>commons-logging</artifactId>
                 <version>1.2</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.11</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
