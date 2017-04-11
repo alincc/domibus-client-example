@@ -5,8 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <artifactId>backend-example</artifactId>
         <groupId>eu.domibus</groupId>
+        <artifactId>domibus-client-example</artifactId>
         <version>3.2</version>
     </parent>
 
