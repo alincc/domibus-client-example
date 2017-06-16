@@ -154,6 +154,24 @@ public class WebserviceExampleTest {
         //of this test, the messageId of the downloaded message must be the same as the messageId of the message initially
         //sent to the MSH
         assertEquals(messageId, ebMSHeaderResponse.getUserMessage().getMessageInfo().getMessageId());
+
+        //test DOWNLOADED status
+        GetStatusRequest messageStatusRequest = new GetStatusRequest();
+        //The messageId determines the message for which the status is requested
+        messageStatusRequest.setMessageID(messageId);
+
+        MessageStatus response = backendInterface.getMessageStatus(messageStatusRequest);
+
+        assertEquals(MessageStatus.RECEIVED, response);
+
+        StatusRequest statusRequest = new StatusRequest();
+        //The messageId determines the message for which the status is requested
+        statusRequest.setMessageID(messageId);
+
+        response = backendInterface.getStatus(statusRequest);
+
+        assertEquals(MessageStatus.DOWNLOADED, response);
+
     }
 
     @Test
