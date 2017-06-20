@@ -7,8 +7,8 @@
 				qualifiedName="http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/defaultMPC"
 				enabled="true" 
 				default="true" 
-				retention_downloaded="0" 
-				retention_undownloaded="60"/>
+				retention_downloaded="100"
+				retention_undownloaded="600"/>
 	</mpcs>
 	<businessProcesses>
 		<roles>
@@ -29,7 +29,7 @@
 				<identifier partyId="ceftestparty5gw" partyIdType="partyTypeUnregistered"/>
 			</party>
 			<party name="cefsupportgw" 
-					endpoint="http://localhost:8090/domibus/services/msh" 
+					endpoint="http://localhost:8180/domibus/services/msh"
 					allowChunking="false"
 >
 				<identifier partyId="cefsupportgw" partyIdType="partyTypeUnregistered"/>
