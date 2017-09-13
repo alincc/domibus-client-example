@@ -33,14 +33,6 @@ import static org.junit.Assert.*;
  */
 public class WebserviceExampleTest {
 
-    //In case you MSH webservice is not running on "http://localhost:8080/domibus/services/msh", please change this constant accordingly
-    private static final String MSH_URL = "http://localhost:8080/domibus/services/msh";
-    //private static final String MSH_URL = "http://10.57.224.44:8080/domibus/services/msh";
-
-    //In case you backend webservice is not running on "http://localhost:8080/domibus/services/backend?wsdl", please change this constant accordingly
-    private static final String BACKENDWS_URL = "http://localhost:8080/domibus/services/backend?wsdl";
-    //private static final String BACKENDWS_URL = "http://10.57.224.44:8080/services/backend?wsdl";
-
     private static final String TESTSENDMESSAGE_LOCATION_SENDREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_sendRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_SUBMITREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_submitRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_MESSAGING = "src/test/resources/eu/domibus/example/ws/sendMessage_messaging.xml";
@@ -351,7 +343,7 @@ public class WebserviceExampleTest {
             jaxbMessagingContext.createMarshaller().marshal(new JAXBElement(new QName("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/", "Messaging"), Messaging.class, messaging), soapMessage.getSOAPHeader());
 
             AttachmentPart attachment=soapMessage.createAttachmentPart();
-            attachment.setContent("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<hello>world</hello>", "text/xml");
+            attachment.setContent("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=", "text/xml");
             attachment.setContentId("payload");
             soapMessage.addAttachmentPart(attachment);
             soapMessage.saveChanges();
