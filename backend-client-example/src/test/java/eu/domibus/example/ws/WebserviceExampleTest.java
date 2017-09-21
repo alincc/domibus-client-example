@@ -84,13 +84,13 @@ public class WebserviceExampleTest {
         Thread.sleep(2000);
 
         for (String messageIdCurrentMessage : listPendingMessagesResponse.getMessageID()) {
-            DownloadMessageRequest downloadMessageRequest = new DownloadMessageRequest();
-            downloadMessageRequest.setMessageID(messageIdCurrentMessage);
+            RetrieveMessageRequest retrieveMessageRequest = new RetrieveMessageRequest();
+            retrieveMessageRequest.setMessageID(messageIdCurrentMessage);
 
-            Holder<DownloadMessageResponse> responseHolder = new Holder<DownloadMessageResponse>();
-            Holder<Messaging> messagingHolder = new Holder<Messaging>();
+            Holder<RetrieveMessageResponse> responseHolder = new Holder<>();
+            Holder<Messaging> messagingHolder = new Holder<>();
 
-            backendInterface.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
+            backendInterface.retrieveMessage(retrieveMessageRequest, responseHolder, messagingHolder);
         }
     }
 
@@ -232,6 +232,25 @@ public class WebserviceExampleTest {
 
     }
 
+    @Test(expected = RetrieveMessageFault.class)
+    public void testRetrieveMessage_MessageIdEmpty_RetrieveMessageFaultExpected() throws Exception {
+        RetrieveMessageRequest retrieveMessageRequest = new RetrieveMessageRequest();
+        //the messageId has been set. In this case, only the messageID corresponding to this messageID must be downloaded
+        retrieveMessageRequest.setMessageID("");
+
+        //Since this method has two return values the response objects are passed over as method parameters.
+        Holder<RetrieveMessageResponse> responseHolder = new Holder<>();
+        Holder<Messaging> messagingHolder = new Holder<>();
+
+        try {
+            backendInterface.retrieveMessage(retrieveMessageRequest, responseHolder, messagingHolder);
+        } catch (RetrieveMessageFault retrieveMessageFault) {
+            assertEquals("Message ID is empty", retrieveMessageFault.getMessage());
+            throw retrieveMessageFault;
+        }
+        fail();
+    }
+
     @Test
     public void testListPendingMessages_CorrectRequest_NoErrorsExpected() throws Exception {
         //create new unique messageId
@@ -283,6 +302,22 @@ public class WebserviceExampleTest {
         MessageStatus response = backendInterface.getStatus(messageStatusRequest);
 
         assertEquals(MessageStatus.RECEIVED, response);
+    }
+
+    @Test(expected = StatusFault.class)
+    public void testGetStatus_MessageIdEmpty_StatusFaultExpected() throws Exception {
+
+        StatusRequest messageStatusRequest = new StatusRequest();
+        //The messageId determines the message for which the status is requested
+        messageStatusRequest.setMessageID("");
+
+        try {
+            backendInterface.getStatus(messageStatusRequest);
+        } catch(StatusFault statusFault) {
+            assertEquals("Message ID is empty", statusFault.getMessage());
+            throw statusFault;
+        }
+        fail();
     }
 
     @Test
