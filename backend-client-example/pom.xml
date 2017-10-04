@@ -27,7 +27,7 @@
         <dependency>
             <groupId>eu.domibus</groupId>
             <artifactId>domibus-ws-stubs</artifactId>
-            <version>3.2</version>
+            <version>3.3-SNAPSHOT</version>
         </dependency>
 
         <dependency>

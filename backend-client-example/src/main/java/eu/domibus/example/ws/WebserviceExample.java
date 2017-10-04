@@ -41,7 +41,7 @@ public class WebserviceExample {
         BindingProvider bindingProvider = (BindingProvider) backendPort;
 
         List<Handler> handlers = bindingProvider.getBinding().getHandlerChain();
-        handlers.add(new MessageLoggingHandler());
+        handlers.add(new MessageLoggingHandler());//disable this if working with large files
         bindingProvider.getBinding().setHandlerChain(handlers);
 
         return backendPort;

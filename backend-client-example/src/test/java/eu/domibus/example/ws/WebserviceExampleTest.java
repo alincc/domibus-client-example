@@ -12,6 +12,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import javax.xml.namespace.QName;
+import javax.xml.soap.AttachmentPart;
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.ws.Dispatch;
@@ -32,15 +33,8 @@ import static org.junit.Assert.*;
  */
 public class WebserviceExampleTest {
 
-    //In case you MSH webservice is not running on "http://localhost:8080/domibus/services/msh", please change this constant accordingly
-    private static final String MSH_URL = "http://localhost:8080/domibus/services/msh";
-    //private static final String MSH_URL = "http://10.57.224.44:8080/domibus/services/msh";
-
-    //In case you backend webservice is not running on "http://localhost:8080/domibus/services/backend?wsdl", please change this constant accordingly
-    private static final String BACKENDWS_URL = "http://localhost:8080/domibus/services/backend?wsdl";
-    //private static final String BACKENDWS_URL = "http://10.57.224.44:8080/services/backend?wsdl";
-
     private static final String TESTSENDMESSAGE_LOCATION_SENDREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_sendRequest.xml";
+    private static final String TESTSENDMESSAGE_LOCATION_SUBMITREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_submitRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_MESSAGING = "src/test/resources/eu/domibus/example/ws/sendMessage_messaging.xml";
     private static final String SAMPLE_MSH_MESSAGE = "src/test/resources/eu/domibus/example/ws/sampleMSHMessage.xml";
 
@@ -90,13 +84,13 @@ public class WebserviceExampleTest {
         Thread.sleep(2000);
 
         for (String messageIdCurrentMessage : listPendingMessagesResponse.getMessageID()) {
-            DownloadMessageRequest downloadMessageRequest = new DownloadMessageRequest();
-            downloadMessageRequest.setMessageID(messageIdCurrentMessage);
+            RetrieveMessageRequest retrieveMessageRequest = new RetrieveMessageRequest();
+            retrieveMessageRequest.setMessageID(messageIdCurrentMessage);
 
-            Holder<DownloadMessageResponse> responseHolder = new Holder<DownloadMessageResponse>();
-            Holder<Messaging> messagingHolder = new Holder<Messaging>();
+            Holder<RetrieveMessageResponse> responseHolder = new Holder<>();
+            Holder<Messaging> messagingHolder = new Holder<>();
 
-            backendInterface.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
+            backendInterface.retrieveMessage(retrieveMessageRequest, responseHolder, messagingHolder);
         }
     }
 
@@ -109,10 +103,21 @@ public class WebserviceExampleTest {
 
     @Test
     public void testSendMessage_CorrectRequest_NoErrorsExpected() throws Exception {
-        SendRequest sendRequest = Helper.parseSendRequestXML(TESTSENDMESSAGE_LOCATION_SENDREQUEST);
+        SendRequest sendRequest = Helper.parseSendRequestXML(TESTSENDMESSAGE_LOCATION_SENDREQUEST,SendRequest.class);
         Messaging messaging = Helper.parseMessagingXML(TESTSENDMESSAGE_LOCATION_MESSAGING);
 
         SendResponse result = backendInterface.sendMessage(sendRequest, messaging);
+        assertNotNull(result);
+        assertNotNull(result.getMessageID());
+        assertNotEquals("", result.getMessageID());
+    }
+
+    @Test
+    public void testSubmitMessage_CorrectRequest_NoErrorsExpected() throws Exception {
+        SubmitRequest submitRequest = Helper.parseSendRequestXML(TESTSENDMESSAGE_LOCATION_SUBMITREQUEST,SubmitRequest.class);
+        Messaging messaging = Helper.parseMessagingXML(TESTSENDMESSAGE_LOCATION_MESSAGING);
+
+        SubmitResponse result = backendInterface.submitMessage(submitRequest, messaging);
         assertNotNull(result);
         assertNotNull(result.getMessageID());
         assertNotEquals("", result.getMessageID());
@@ -147,13 +152,103 @@ public class WebserviceExampleTest {
         assertNotNull(responseHolder);
         assertNotNull(messagingHolder);
 
-        DownloadMessageResponse downloadMessageResponse = responseHolder.value;
         Messaging ebMSHeaderResponse = messagingHolder.value;
 
         //Since the only message that should be available for download is the message we have sent at the beginning
         //of this test, the messageId of the downloaded message must be the same as the messageId of the message initially
         //sent to the MSH
         assertEquals(messageId, ebMSHeaderResponse.getUserMessage().getMessageInfo().getMessageId());
+
+        //test DOWNLOADED status
+        GetStatusRequest messageStatusRequest = new GetStatusRequest();
+        //The messageId determines the message for which the status is requested
+        messageStatusRequest.setMessageID(messageId);
+
+        MessageStatus response = backendInterface.getMessageStatus(messageStatusRequest);
+
+       assertEquals(MessageStatus.RECEIVED, response);
+
+        StatusRequest statusRequest = new StatusRequest();
+        //The messageId determines the message for which the status is requested
+        statusRequest.setMessageID(messageId);
+
+        response = backendInterface.getStatus(statusRequest);
+
+        assertEquals(MessageStatus.DOWNLOADED, response);
+
+    }
+
+    @Test
+    public void testRetrieveMessage_MessageIdProvided_MessageWithMessageIDExpected() throws Exception {
+        //create new unique messageId
+        String messageId = UUID.randomUUID().toString();
+
+        //send message to domibus instance, but on the MSH side, in order to have a message that is available for download
+        Helper.prepareMSHTestMessage(messageId, SAMPLE_MSH_MESSAGE);
+
+        //wait until the message should be received
+        Thread.sleep(2000);
+
+        //send an additional message that would be the next message instead of the first one
+        Helper.prepareMSHTestMessage(null, null);
+
+        RetrieveMessageRequest retrieveMessageRequest = new RetrieveMessageRequest();
+        //the messageId has been set. In this case, only the messageID corresponding to this messageID must be downloaded
+        retrieveMessageRequest.setMessageID(messageId);
+
+        //Since this method has two return values the response objects are passed over as method parameters.
+        Holder<RetrieveMessageResponse> responseHolder = new Holder<>();
+        Holder<Messaging> messagingHolder = new Holder<>();
+
+
+        backendInterface.retrieveMessage(retrieveMessageRequest, responseHolder, messagingHolder);
+
+        assertNotNull(responseHolder);
+        assertNotNull(messagingHolder);
+
+        Messaging ebMSHeaderResponse = messagingHolder.value;
+
+        //Since the only message that should be available for download is the message we have sent at the beginning
+        //of this test, the messageId of the downloaded message must be the same as the messageId of the message initially
+        //sent to the MSH
+        assertEquals(messageId, ebMSHeaderResponse.getUserMessage().getMessageInfo().getMessageId());
+
+        //test DOWNLOADED status
+        GetStatusRequest messageStatusRequest = new GetStatusRequest();
+        //The messageId determines the message for which the status is requested
+        messageStatusRequest.setMessageID(messageId);
+
+        MessageStatus response = backendInterface.getMessageStatus(messageStatusRequest);
+
+        assertEquals(MessageStatus.RECEIVED, response);
+
+        StatusRequest statusRequest = new StatusRequest();
+        //The messageId determines the message for which the status is requested
+        statusRequest.setMessageID(messageId);
+
+        response = backendInterface.getStatus(statusRequest);
+
+        assertEquals(MessageStatus.DOWNLOADED, response);
+
+    }
+
+    @Test(expected = RetrieveMessageFault.class)
+    public void testRetrieveMessage_MessageIdEmpty_RetrieveMessageFaultExpected() throws Exception {
+        RetrieveMessageRequest retrieveMessageRequest = new RetrieveMessageRequest();
+        //the messageId has been set. In this case, only the messageID corresponding to this messageID must be downloaded
+        retrieveMessageRequest.setMessageID("");
+
+        //Since this method has two return values the response objects are passed over as method parameters.
+        Holder<RetrieveMessageResponse> responseHolder = new Holder<>();
+        Holder<Messaging> messagingHolder = new Holder<>();
+
+        try {
+            backendInterface.retrieveMessage(retrieveMessageRequest, responseHolder, messagingHolder);
+        } catch (RetrieveMessageFault retrieveMessageFault) {
+            assertEquals("Message ID is empty", retrieveMessageFault.getMessage());
+            throw retrieveMessageFault;
+        }
+        fail();
     }
 
     @Test
@@ -187,6 +282,42 @@ public class WebserviceExampleTest {
         MessageStatus response = backendInterface.getMessageStatus(messageStatusRequest);
 
         assertEquals(MessageStatus.RECEIVED, response);
+    }
+
+    @Test
+    public void testGetStatus_MessageIdProvided_NoErrorsExpected() throws Exception {
+        //create new unique messageId
+        String messageId = UUID.randomUUID().toString();
+
+        //send message to domibus instance, but on the MSH side, in order to have a message that is available for download
+        Helper.prepareMSHTestMessage(messageId, SAMPLE_MSH_MESSAGE);
+
+        //wait until the message should be received
+        Thread.sleep(2000);
+
+        StatusRequest messageStatusRequest = new StatusRequest();
+        //The messageId determines the message for which the status is requested
+        messageStatusRequest.setMessageID(messageId);
+
+        MessageStatus response = backendInterface.getStatus(messageStatusRequest);
+
+        assertEquals(MessageStatus.RECEIVED, response);
+    }
+
+    @Test(expected = StatusFault.class)
+    public void testGetStatus_MessageIdEmpty_StatusFaultExpected() throws Exception {
+
+        StatusRequest messageStatusRequest = new StatusRequest();
+        //The messageId determines the message for which the status is requested
+        messageStatusRequest.setMessageID("");
+
+        try {
+            backendInterface.getStatus(messageStatusRequest);
+        } catch(StatusFault statusFault) {
+            assertEquals("Message ID is empty", statusFault.getMessage());
+            throw statusFault;
+        }
+        fail();
     }
 
     @Test
@@ -228,8 +359,8 @@ public class WebserviceExampleTest {
 
         }
 
-        private static SendRequest parseSendRequestXML(String uriSendRequestXML) throws Exception {
-            return (SendRequest) jaxbWebserviceContext.createUnmarshaller().unmarshal(new File(uriSendRequestXML));
+        private static <E> E parseSendRequestXML(final String uriSendRequestXML,Class<E> requestType) throws Exception {
+            return (E) jaxbWebserviceContext.createUnmarshaller().unmarshal(new File(uriSendRequestXML));
         }
 
         private static Messaging parseMessagingXML(String uriMessagingXML) throws Exception {
@@ -244,12 +375,13 @@ public class WebserviceExampleTest {
             final Dispatch<SOAPMessage> dispatch = service.createDispatch(portName, SOAPMessage.class, javax.xml.ws.Service.Mode.MESSAGE);
 
             SOAPMessage soapMessage = messageFactory.createMessage();
-
-//            jaxbMessagingContext.createMarshaller().marshal(messaging, soapMessage.getSOAPHeader());
             jaxbMessagingContext.createMarshaller().marshal(new JAXBElement(new QName("http://docs.oasis-open.org/ebxml-msg/ebms/v3.0/ns/core/200704/", "Messaging"), Messaging.class, messaging), soapMessage.getSOAPHeader());
-            soapMessage.getSOAPBody().addTextNode("This is the content of the body");
-            soapMessage.saveChanges();
 
+            AttachmentPart attachment=soapMessage.createAttachmentPart();
+            attachment.setContent("PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGhlbGxvPndvcmxkPC9oZWxsbz4=", "text/xml");
+            attachment.setContentId("payload");
+            soapMessage.addAttachmentPart(attachment);
+            soapMessage.saveChanges();
             return dispatch.invoke(soapMessage);
         }
 
