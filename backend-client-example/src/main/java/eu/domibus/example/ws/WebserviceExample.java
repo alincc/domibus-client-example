@@ -1,5 +1,6 @@
 package eu.domibus.example.ws;
 
+import com.sun.xml.internal.ws.developer.JAXWSProperties;
 import eu.domibus.example.ws.logging.MessageLoggingHandler;
 import eu.domibus.plugin.webService.generated.BackendInterface;
 import eu.domibus.plugin.webService.generated.BackendService11;
@@ -9,9 +10,11 @@ import org.apache.commons.logging.LogFactory;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
+import javax.xml.ws.soap.SOAPBinding;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Map;
 
 
 public class WebserviceExample {
@@ -38,10 +41,19 @@ public class WebserviceExample {
         BackendService11 backendService = new BackendService11(new URL(wsdl),  new QName("http://org.ecodex.backend/1_1/", "BackendService_1_1"));
         BackendInterface backendPort = backendService.getBACKENDPORT();
 
-        BindingProvider bindingProvider = (BindingProvider) backendPort;
 
+        //enable chunking
+        BindingProvider bindingProvider = (BindingProvider) backendPort;
+        Map<String, Object> ctxt = bindingProvider.getRequestContext();
+        ctxt.put(JAXWSProperties.HTTP_CLIENT_STREAMING_CHUNK_SIZE, 8192);
+        //enable MTOM
+        SOAPBinding binding = (SOAPBinding)bindingProvider.getBinding();
+        binding.setMTOMEnabled(true);
+
+
+        //comment the following lines if sending large files
         List<Handler> handlers = bindingProvider.getBinding().getHandlerChain();
-        handlers.add(new MessageLoggingHandler());//disable this if working with large files
+        handlers.add(new MessageLoggingHandler());
         bindingProvider.getBinding().setHandlerChain(handlers);
 
         return backendPort;

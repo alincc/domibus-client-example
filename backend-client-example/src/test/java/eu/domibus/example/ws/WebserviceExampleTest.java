@@ -6,6 +6,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import javax.activation.DataHandler;
+import javax.activation.FileDataSource;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -115,6 +117,25 @@ public class WebserviceExampleTest {
     @Test
     public void testSubmitMessage_CorrectRequest_NoErrorsExpected() throws Exception {
         SubmitRequest submitRequest = Helper.parseSendRequestXML(TESTSENDMESSAGE_LOCATION_SUBMITREQUEST,SubmitRequest.class);
+        Messaging messaging = Helper.parseMessagingXML(TESTSENDMESSAGE_LOCATION_MESSAGING);
+
+        SubmitResponse result = backendInterface.submitMessage(submitRequest, messaging);
+        assertNotNull(result);
+        assertNotNull(result.getMessageID());
+        assertNotEquals("", result.getMessageID());
+    }
+
+
+    //@Test
+    public void testSubmitMessageWithLargeFiles() throws Exception {
+        SubmitRequest submitRequest = new SubmitRequest();
+        LargePayloadType largepayload = new LargePayloadType();
+        largepayload.setPayloadId("cid:payload");
+        largepayload.setContentType("application/octet-stream");
+        final DataHandler dataHandler = new DataHandler(new FileDataSource("C:/DEV/1_2GB.zip"));
+        largepayload.setValue(dataHandler);
+        submitRequest.getPayload().add(largepayload);
+
         Messaging messaging = Helper.parseMessagingXML(TESTSENDMESSAGE_LOCATION_MESSAGING);
 
         SubmitResponse result = backendInterface.submitMessage(submitRequest, messaging);
