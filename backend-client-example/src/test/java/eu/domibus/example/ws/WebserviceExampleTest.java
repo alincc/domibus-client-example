@@ -210,26 +210,6 @@ public class WebserviceExampleTest {
     }
 
     @Test
-    public void testGetMessageStatus_MessageIdProvided_NoErrorsExpected() throws Exception {
-        //create new unique messageId
-        String messageId = UUID.randomUUID().toString();
-
-        //send message to domibus instance, but on the MSH side, in order to have a message that is available for download
-        Helper.prepareMSHTestMessage(messageId, SAMPLE_MSH_MESSAGE);
-
-        //wait until the message should be received
-        Thread.sleep(2000);
-
-        StatusRequest statusRequest = new StatusRequest();
-        //The messageId determines the message for which the status is requested
-        statusRequest.setMessageID(messageId);
-
-        MessageStatus response = backendInterface.getStatus(statusRequest);
-
-        assertEquals(MessageStatus.RECEIVED, response);
-    }
-
-    @Test
     public void testGetStatus_MessageIdProvided_NoErrorsExpected() throws Exception {
         //create new unique messageId
         String messageId = UUID.randomUUID().toString();
