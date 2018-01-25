@@ -1,5 +1,6 @@
 package eu.domibus.example.ws;
 
+import com.sun.xml.internal.ws.fault.ServerSOAPFaultException;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.plugin.webService.generated.*;
 import org.junit.After;
@@ -35,12 +36,11 @@ import static org.junit.Assert.*;
  */
 public class WebserviceExampleTest {
 
-    private static final String TESTSENDMESSAGE_LOCATION_SENDREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_sendRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_SUBMITREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_submitRequest.xml";
     private static final String TESTSENDMESSAGE_LOCATION_MESSAGING = "src/test/resources/eu/domibus/example/ws/sendMessage_messaging.xml";
     private static final String SAMPLE_MSH_MESSAGE = "src/test/resources/eu/domibus/example/ws/sampleMSHMessage.xml";
 
-    public static final String CONFIG_PROPERTIES = "config.properties";
+    private static final String CONFIG_PROPERTIES = "config.properties";
 
     private WebserviceExample webserviceExample;
     private BackendInterface backendInterface;
@@ -102,18 +102,6 @@ public class WebserviceExampleTest {
         backendInterface = webserviceExample.getPort();
     }
 
-
-    @Test
-    public void testSendMessage_CorrectRequest_NoErrorsExpected() throws Exception {
-        SendRequest sendRequest = Helper.parseSendRequestXML(TESTSENDMESSAGE_LOCATION_SENDREQUEST,SendRequest.class);
-        Messaging messaging = Helper.parseMessagingXML(TESTSENDMESSAGE_LOCATION_MESSAGING);
-
-        SendResponse result = backendInterface.sendMessage(sendRequest, messaging);
-        assertNotNull(result);
-        assertNotNull(result.getMessageID());
-        assertNotEquals("", result.getMessageID());
-    }
-
     @Test
     public void testSubmitMessage_CorrectRequest_NoErrorsExpected() throws Exception {
         SubmitRequest submitRequest = Helper.parseSendRequestXML(TESTSENDMESSAGE_LOCATION_SUBMITREQUEST,SubmitRequest.class);
@@ -144,60 +132,6 @@ public class WebserviceExampleTest {
         assertNotEquals("", result.getMessageID());
     }
 
-
-    @Test
-    public void testDownloadMessage_MessageIdProvided_MessageWithMessageIDExpected() throws Exception {
-        //create new unique messageId
-        String messageId = UUID.randomUUID().toString();
-
-        //send message to domibus instance, but on the MSH side, in order to have a message that is available for download
-        Helper.prepareMSHTestMessage(messageId, SAMPLE_MSH_MESSAGE);
-
-        //wait until the message should be received
-        Thread.sleep(2000);
-
-        //send an additional message that would be the next message instead of the first one
-        Helper.prepareMSHTestMessage(null, null);
-
-        DownloadMessageRequest downloadMessageRequest = new DownloadMessageRequest();
-        //the messageId has been set. In this case, only the messageID corresponding to this messageID must be downloaded
-        downloadMessageRequest.setMessageID(messageId);
-
-        //Since this method has two return values the response objects are passed over as method parameters.
-        Holder<DownloadMessageResponse> responseHolder = new Holder<DownloadMessageResponse>();
-        Holder<Messaging> messagingHolder = new Holder<Messaging>();
-
-
-        backendInterface.downloadMessage(downloadMessageRequest, responseHolder, messagingHolder);
-
-        assertNotNull(responseHolder);
-        assertNotNull(messagingHolder);
-
-        Messaging ebMSHeaderResponse = messagingHolder.value;
-
-        //Since the only message that should be available for download is the message we have sent at the beginning
-        //of this test, the messageId of the downloaded message must be the same as the messageId of the message initially
-        //sent to the MSH
-        assertEquals(messageId, ebMSHeaderResponse.getUserMessage().getMessageInfo().getMessageId());
-
-        //test DOWNLOADED status
-        GetStatusRequest messageStatusRequest = new GetStatusRequest();
-        //The messageId determines the message for which the status is requested
-        messageStatusRequest.setMessageID(messageId);
-
-        MessageStatus response = backendInterface.getMessageStatus(messageStatusRequest);
-
-       assertEquals(MessageStatus.RECEIVED, response);
-
-        StatusRequest statusRequest = new StatusRequest();
-        //The messageId determines the message for which the status is requested
-        statusRequest.setMessageID(messageId);
-
-        response = backendInterface.getStatus(statusRequest);
-
-        assertEquals(MessageStatus.DOWNLOADED, response);
-
-    }
 
     @Test
     public void testRetrieveMessage_MessageIdProvided_MessageWithMessageIDExpected() throws Exception {
@@ -235,26 +169,17 @@ public class WebserviceExampleTest {
         assertEquals(messageId, ebMSHeaderResponse.getUserMessage().getMessageInfo().getMessageId());
 
         //test DOWNLOADED status
-        GetStatusRequest messageStatusRequest = new GetStatusRequest();
-        //The messageId determines the message for which the status is requested
-        messageStatusRequest.setMessageID(messageId);
-
-        MessageStatus response = backendInterface.getMessageStatus(messageStatusRequest);
-
-        assertEquals(MessageStatus.RECEIVED, response);
-
         StatusRequest statusRequest = new StatusRequest();
         //The messageId determines the message for which the status is requested
         statusRequest.setMessageID(messageId);
 
-        response = backendInterface.getStatus(statusRequest);
-
+        MessageStatus response = backendInterface.getStatus(statusRequest);
         assertEquals(MessageStatus.DOWNLOADED, response);
 
     }
 
-    @Test(expected = RetrieveMessageFault.class)
-    public void testRetrieveMessage_MessageIdEmpty_RetrieveMessageFaultExpected() throws Exception {
+    @Test(expected = ServerSOAPFaultException.class)
+    public void testRetrieveMessage_MessageIdEmpty_ServerSOAPFaultExpected() throws Exception {
         RetrieveMessageRequest retrieveMessageRequest = new RetrieveMessageRequest();
         //the messageId has been set. In this case, only the messageID corresponding to this messageID must be downloaded
         retrieveMessageRequest.setMessageID("");
@@ -286,26 +211,6 @@ public class WebserviceExampleTest {
     }
 
     @Test
-    public void testGetMessageStatus_MessageIdProvided_NoErrorsExpected() throws Exception {
-        //create new unique messageId
-        String messageId = UUID.randomUUID().toString();
-
-        //send message to domibus instance, but on the MSH side, in order to have a message that is available for download
-        Helper.prepareMSHTestMessage(messageId, SAMPLE_MSH_MESSAGE);
-
-        //wait until the message should be received
-        Thread.sleep(2000);
-
-        GetStatusRequest messageStatusRequest = new GetStatusRequest();
-        //The messageId determines the message for which the status is requested
-        messageStatusRequest.setMessageID(messageId);
-
-        MessageStatus response = backendInterface.getMessageStatus(messageStatusRequest);
-
-        assertEquals(MessageStatus.RECEIVED, response);
-    }
-
-    @Test
     public void testGetStatus_MessageIdProvided_NoErrorsExpected() throws Exception {
         //create new unique messageId
         String messageId = UUID.randomUUID().toString();
@@ -325,8 +230,8 @@ public class WebserviceExampleTest {
         assertEquals(MessageStatus.RECEIVED, response);
     }
 
-    @Test(expected = StatusFault.class)
-    public void testGetStatus_MessageIdEmpty_StatusFaultExpected() throws Exception {
+    @Test(expected = ServerSOAPFaultException.class)
+    public void testGetStatus_MessageIdEmpty_ServerSOAPFaultExpected() throws Exception {
 
         StatusRequest messageStatusRequest = new StatusRequest();
         //The messageId determines the message for which the status is requested
@@ -441,7 +346,7 @@ public class WebserviceExampleTest {
             return messageId;
         }
 
-        public static String errorResultAsFormattedString(ErrorResultImplArray errorResultArray) {
+        private static String errorResultAsFormattedString(ErrorResultImplArray errorResultArray) {
             StringBuilder formattedOutput = new StringBuilder();
 
             for (ErrorResultImpl errorResult : errorResultArray.getItem()) {
