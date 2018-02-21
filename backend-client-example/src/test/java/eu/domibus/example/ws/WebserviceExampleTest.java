@@ -36,8 +36,8 @@ import static org.junit.Assert.*;
  */
 public class WebserviceExampleTest {
 
-    private static final String TESTSENDMESSAGE_LOCATION_SUBMITREQUEST = "src/test/resources/eu/domibus/example/ws/sendMessage_submitRequest.xml";
-    private static final String TESTSENDMESSAGE_LOCATION_MESSAGING = "src/test/resources/eu/domibus/example/ws/sendMessage_messaging.xml";
+    private static final String TEST_SUBMIT_MESSAGE_SUBMITREQUEST = "src/test/resources/eu/domibus/example/ws/submitMessage_submitRequest.xml";
+    private static final String TEST_SUBMIT_MESSAGE_MESSAGING = "src/test/resources/eu/domibus/example/ws/submitMessage_messaging.xml";
     private static final String SAMPLE_MSH_MESSAGE = "src/test/resources/eu/domibus/example/ws/sampleMSHMessage.xml";
 
     private static final String CONFIG_PROPERTIES = "config.properties";
@@ -104,8 +104,8 @@ public class WebserviceExampleTest {
 
     @Test
     public void testSubmitMessage_CorrectRequest_NoErrorsExpected() throws Exception {
-        SubmitRequest submitRequest = Helper.parseSendRequestXML(TESTSENDMESSAGE_LOCATION_SUBMITREQUEST,SubmitRequest.class);
-        Messaging messaging = Helper.parseMessagingXML(TESTSENDMESSAGE_LOCATION_MESSAGING);
+        SubmitRequest submitRequest = Helper.parseSendRequestXML(TEST_SUBMIT_MESSAGE_SUBMITREQUEST,SubmitRequest.class);
+        Messaging messaging = Helper.parseMessagingXML(TEST_SUBMIT_MESSAGE_MESSAGING);
 
         SubmitResponse result = backendInterface.submitMessage(submitRequest, messaging);
         assertNotNull(result);
@@ -124,7 +124,7 @@ public class WebserviceExampleTest {
         largepayload.setValue(dataHandler);
         submitRequest.getPayload().add(largepayload);
 
-        Messaging messaging = Helper.parseMessagingXML(TESTSENDMESSAGE_LOCATION_MESSAGING);
+        Messaging messaging = Helper.parseMessagingXML(TEST_SUBMIT_MESSAGE_MESSAGING);
 
         SubmitResponse result = backendInterface.submitMessage(submitRequest, messaging);
         assertNotNull(result);
