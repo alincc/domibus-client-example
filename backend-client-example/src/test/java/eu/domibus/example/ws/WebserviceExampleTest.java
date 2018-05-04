@@ -24,6 +24,7 @@ import javax.xml.ws.soap.SOAPBinding;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Properties;
@@ -334,7 +335,7 @@ public class WebserviceExampleTest {
             //set messageId
             messaging.getUserMessage().getMessageInfo().setMessageId(messageId);
             //set timestamp
-            messaging.getUserMessage().getMessageInfo().setTimestamp(Helper.getCurrentDate());
+            messaging.getUserMessage().getMessageInfo().setTimestamp(LocalDateTime.now());
 
             SOAPMessage responseFromMSH = Helper.dispatchMessage(messaging);
 
