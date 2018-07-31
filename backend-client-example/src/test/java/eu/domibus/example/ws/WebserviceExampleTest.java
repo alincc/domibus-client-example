@@ -192,7 +192,7 @@ public class WebserviceExampleTest {
         try {
             backendInterface.retrieveMessage(retrieveMessageRequest, responseHolder, messagingHolder);
         } catch (RetrieveMessageFault retrieveMessageFault) {
-            assertEquals("Message ID is empty", retrieveMessageFault.getMessage());
+            assertEquals("retrieveMessageRequest is not valid against the XSD", retrieveMessageFault.getMessage());
             throw retrieveMessageFault;
         }
         fail();
@@ -241,7 +241,7 @@ public class WebserviceExampleTest {
         try {
             backendInterface.getStatus(messageStatusRequest);
         } catch(StatusFault statusFault) {
-            assertEquals("Message ID is empty", statusFault.getMessage());
+            assertEquals("Status request is not valid against the XSD", statusFault.getMessage());
             throw statusFault;
         }
         fail();
