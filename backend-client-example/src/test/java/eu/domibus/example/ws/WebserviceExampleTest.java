@@ -179,7 +179,7 @@ public class WebserviceExampleTest {
 
     }
 
-    @Test(expected = RetrieveMessageFault.class)
+    @Test(expected = ServerSOAPFaultException.class)
     public void testRetrieveMessage_MessageIdEmpty_ServerSOAPFaultExpected() throws Exception {
         RetrieveMessageRequest retrieveMessageRequest = new RetrieveMessageRequest();
         //the messageId has been set. In this case, only the messageID corresponding to this messageID must be downloaded
@@ -192,7 +192,7 @@ public class WebserviceExampleTest {
         try {
             backendInterface.retrieveMessage(retrieveMessageRequest, responseHolder, messagingHolder);
         } catch (RetrieveMessageFault retrieveMessageFault) {
-            assertEquals("retrieveMessageRequest is not valid against the XSD", retrieveMessageFault.getMessage());
+            assertEquals("Message ID is empty", retrieveMessageFault.getMessage());
             throw retrieveMessageFault;
         }
         fail();
@@ -231,7 +231,7 @@ public class WebserviceExampleTest {
         assertEquals(MessageStatus.RECEIVED, response);
     }
 
-    @Test(expected = StatusFault.class)
+    @Test(expected = ServerSOAPFaultException.class)
     public void testGetStatus_MessageIdEmpty_ServerSOAPFaultExpected() throws Exception {
 
         StatusRequest messageStatusRequest = new StatusRequest();
@@ -241,7 +241,7 @@ public class WebserviceExampleTest {
         try {
             backendInterface.getStatus(messageStatusRequest);
         } catch(StatusFault statusFault) {
-            assertEquals("Status request is not valid against the XSD", statusFault.getMessage());
+            assertEquals("Message ID is empty", statusFault.getMessage());
             throw statusFault;
         }
         fail();
