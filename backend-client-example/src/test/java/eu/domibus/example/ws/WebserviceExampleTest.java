@@ -1,6 +1,5 @@
 package eu.domibus.example.ws;
 
-import com.sun.xml.internal.ws.fault.ServerSOAPFaultException;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.plugin.webService.generated.*;
 import org.junit.After;
@@ -179,7 +178,7 @@ public class WebserviceExampleTest {
 
     }
 
-    @Test(expected = ServerSOAPFaultException.class)
+    @Test(expected = RetrieveMessageFault.class)
     public void testRetrieveMessage_MessageIdEmpty_ServerSOAPFaultExpected() throws Exception {
         RetrieveMessageRequest retrieveMessageRequest = new RetrieveMessageRequest();
         //the messageId has been set. In this case, only the messageID corresponding to this messageID must be downloaded
@@ -231,7 +230,7 @@ public class WebserviceExampleTest {
         assertEquals(MessageStatus.RECEIVED, response);
     }
 
-    @Test(expected = ServerSOAPFaultException.class)
+    @Test(expected = StatusFault.class)
     public void testGetStatus_MessageIdEmpty_ServerSOAPFaultExpected() throws Exception {
 
         StatusRequest messageStatusRequest = new StatusRequest();
