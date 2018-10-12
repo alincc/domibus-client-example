@@ -26,7 +26,6 @@
         </eb:MessageProperties>
         <eb:PayloadInfo>
             <eb:PartInfo href="cid:payload">
-                <eb:Description xml:lang="en-US">business document</eb:Description>
                 <eb:PartProperties>
                     <eb:Property name="MimeType">text/xml</eb:Property>
                 </eb:PartProperties>
