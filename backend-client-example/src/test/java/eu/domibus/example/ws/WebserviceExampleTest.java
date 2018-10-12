@@ -1,5 +1,6 @@
 package eu.domibus.example.ws;
 
+import com.sun.xml.internal.ws.fault.ServerSOAPFaultException;
 import eu.domibus.common.model.org.oasis_open.docs.ebxml_msg.ebms.v3_0.ns.core._200704.Messaging;
 import eu.domibus.plugin.webService.generated.*;
 import org.junit.After;
@@ -178,7 +179,7 @@ public class WebserviceExampleTest {
 
     }
 
-    @Test(expected = RetrieveMessageFault.class)
+    @Test
     public void testRetrieveMessage_MessageIdEmpty_ServerSOAPFaultExpected() throws Exception {
         RetrieveMessageRequest retrieveMessageRequest = new RetrieveMessageRequest();
         //the messageId has been set. In this case, only the messageID corresponding to this messageID must be downloaded
@@ -187,14 +188,20 @@ public class WebserviceExampleTest {
         //Since this method has two return values the response objects are passed over as method parameters.
         Holder<RetrieveMessageResponse> responseHolder = new Holder<>();
         Holder<Messaging> messagingHolder = new Holder<>();
-
+        boolean passed = false;
         try {
             backendInterface.retrieveMessage(retrieveMessageRequest, responseHolder, messagingHolder);
         } catch (RetrieveMessageFault retrieveMessageFault) {
             assertEquals("Message ID is empty", retrieveMessageFault.getMessage());
-            throw retrieveMessageFault;
+            passed = true;
+        } catch (ServerSOAPFaultException ssfe) {
+            assertTrue(ssfe.getMessage().contains("Unmarshalling Error: cvc-minLength-valid:"));
+            passed = true;
         }
-        fail();
+
+        if(!passed) {
+            fail("One of the following exceptions was expected: ServerSOAPFaultException for XSD validation enabled or RetrieveMessageFault when the XSD validation is disabled");
+        }
     }
 
     @Test
@@ -230,20 +237,27 @@ public class WebserviceExampleTest {
         assertEquals(MessageStatus.RECEIVED, response);
     }
 
-    @Test(expected = StatusFault.class)
+    @Test
     public void testGetStatus_MessageIdEmpty_ServerSOAPFaultExpected() throws Exception {
 
         StatusRequest messageStatusRequest = new StatusRequest();
         //The messageId determines the message for which the status is requested
         messageStatusRequest.setMessageID("");
-
+        boolean passed = false;
         try {
             backendInterface.getStatus(messageStatusRequest);
         } catch(StatusFault statusFault) {
             assertEquals("Message ID is empty", statusFault.getMessage());
-            throw statusFault;
+            passed = true;
+        } catch (ServerSOAPFaultException ssfe) {
+            assertTrue(ssfe.getMessage().contains("Unmarshalling Error: cvc-minLength-valid:"));
+            passed = true;
         }
-        fail();
+
+        if(!passed) {
+            fail("One of the following exceptions was expected: ServerSOAPFaultException for XSD validation enabled or StatusFault when the XSD validation is disabled");
+        }
+
     }
 
     @Test
