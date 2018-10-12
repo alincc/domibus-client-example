@@ -188,20 +188,15 @@ public class WebserviceExampleTest {
         //Since this method has two return values the response objects are passed over as method parameters.
         Holder<RetrieveMessageResponse> responseHolder = new Holder<>();
         Holder<Messaging> messagingHolder = new Holder<>();
-        boolean passed = false;
         try {
             backendInterface.retrieveMessage(retrieveMessageRequest, responseHolder, messagingHolder);
+            fail("One of the following exceptions was expected: ServerSOAPFaultException for XSD validation enabled or RetrieveMessageFault when the XSD validation is disabled");
         } catch (RetrieveMessageFault retrieveMessageFault) {
             assertEquals("Message ID is empty", retrieveMessageFault.getMessage());
-            passed = true;
         } catch (ServerSOAPFaultException ssfe) {
             assertTrue(ssfe.getMessage().contains("Unmarshalling Error: cvc-minLength-valid:"));
-            passed = true;
         }
 
-        if(!passed) {
-            fail("One of the following exceptions was expected: ServerSOAPFaultException for XSD validation enabled or RetrieveMessageFault when the XSD validation is disabled");
-        }
     }
 
     @Test
@@ -243,19 +238,13 @@ public class WebserviceExampleTest {
         StatusRequest messageStatusRequest = new StatusRequest();
         //The messageId determines the message for which the status is requested
         messageStatusRequest.setMessageID("");
-        boolean passed = false;
         try {
             backendInterface.getStatus(messageStatusRequest);
+            fail("One of the following exceptions was expected: ServerSOAPFaultException for XSD validation enabled or StatusFault when the XSD validation is disabled");
         } catch(StatusFault statusFault) {
             assertEquals("Message ID is empty", statusFault.getMessage());
-            passed = true;
         } catch (ServerSOAPFaultException ssfe) {
             assertTrue(ssfe.getMessage().contains("Unmarshalling Error: cvc-minLength-valid:"));
-            passed = true;
-        }
-
-        if(!passed) {
-            fail("One of the following exceptions was expected: ServerSOAPFaultException for XSD validation enabled or StatusFault when the XSD validation is disabled");
         }
 
     }
